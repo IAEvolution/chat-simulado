@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+ <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Chat Simulado by Anderson Mak</title>
+</head>
+<body>
+<script>
+var synt = new Array(2);
+
+
+document.addEventListener("DOMContentLoaded", function() {
+
+synt["voz2"] = 'Microsoft Antonio Online (Natural) - Portuguese (Brazil)';
+synt["voz1"] = 'Microsoft Francisca Online (Natural) - Portuguese (Brazil)';
+
+
+let speech = new SpeechSynthesisUtterance();
+
+
+let voices = []; // global array
+
+
+window.speechSynthesis.onvoiceschanged = () => {
+// Get List of Voices
+voices = window.speechSynthesis.getVoices();
+
+
+// Initially set the First Voice in the Array.
+speech.voice = voices[0];
+
+
+// Set the Voice Select List. (Set the Index as the value, which we'll use later when the user updates the Voice using the Select Menu.)
+let voz1 = document.querySelector("#voz1");
+let voz2 = document.querySelector("#voz2");
+voices.forEach((voice, i) => (voz1.options[i] = new Option(voice.name, i),voz2.options[i] = new Option(voice.name, i)));
+};
+
+
+setTimeout(function(){document.getElementById("voz1").querySelectorAll("option").forEach(o => o.selected = o.innerText == synt["voz1"]);},1000);
+setTimeout(function(){document.getElementById("voz2").querySelectorAll("option").forEach(o => o.selected = o.innerText == synt["voz2"])},1000);
+
+
+
+
+});
+
+
+
+
+async function start_(){
+document.getElementById("painel").style.display="none";
+
+
+//document.getElementById("painel").style.visibility="hidden";
+
+
+synt["voz1"] = document.getElementById("voz1").selectedOptions[0].text;
+synt["voz2"] = document.getElementById("voz2").selectedOptions[0].text;
+
+
+back_url = document.getElementById("imgfundo").value;
+
+
+document.body.style.backgroundImage = "url('"+back_url+"')";
+
+
+var mensagens = document.getElementById("conversa").value;
+
+
+mensagens = mensagens.trim();
+mensagens = mensagens.split("\n");
+
+for(let i=0;i<mensagens.length;i++){
+avoz = mensagens[i].substr(0,4);
+otexto = mensagens[i].substr(5);
+
+
+if(otexto.length =="") continue;
+
+
+await appendLi(avoz,otexto);
+await limpa(false);
+await speak(avoz, otexto);
+
+
+}
+
+
+setTimeout('limpa(true)',4000);
+setTimeout(function(){document.getElementById("painel").style.display="block"},4000);
+document.getElementById("voz1").querySelectorAll("option").forEach(o => o.selected = o.innerText == synt["voz1"]);
+document.getElementById("voz2").querySelectorAll("option").forEach(o => o.selected = o.innerText == synt["voz2"]);
+}
+
+</script>
+
+
+<script>
+async function speak(voiceName, text) {
+
+
+voiceName = synt[voiceName];
+
+
+
+
+return new Promise((resolve, reject) => {
+
+
+// Verificar se a síntese de fala é suportada pelo navegador
+if ('speechSynthesis' in window) {
+// Obter a lista de vozes disponíveis
+var voices = speechSynthesis.getVoices();
+
+
+// Encontrar a voz desejada pelo nome
+var voice = voices.find(function(voice) {
+
+return voice.name === voiceName;
+});
+
+
+
+
+// Criar um objeto SpeechSynthesisUtterance
+var utterance = new SpeechSynthesisUtterance(text);
+utterance.voice = voice;
+
+
+// Narrar o texto
+speechSynthesis.speak(utterance);
+
+
+utterance.onend = resolve;
+
+
+} else {
+console.log('A síntese de fala não é suportada pelo navegador.');
+}
+
+
+});
+
+
+}
+
+
+</script>
+
+
+
+
+
+
+
+<style>
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+
+* {
+box-sizing: border-box;
+}
+
+
+body {
+background: url('https://cdn.pixabay.com/photo/2018/01/14/23/12/nature-3082832_1280.jpg');
+background-size: cover;
+background-position: center center;
+
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+
+
+min-height: 100vh;
+font-family: 'Lato', sans-serif;
+margin: 0 0 50px;
+}
+
+
+h2 {
+text-shadow: 1px 1px 2px rgba(0,0,0,1);
+color: #fff;
+letter-spacing: 1px;
+text-transform: uppercase;
+text-align: center;
+}
+
+
+.chat-container {
+background-color: rgba(0, 0, 0, 0.4);
+border-radius: 25px;
+box-shadow: 0px 0px 10px 5px rgba(0,0,0,0.7);
+overflow: hidden;
+padding: 15px;
+position: relative;
+width: 1280px;
+max-width: 100%;
+height:720px;
+}
+
+
+.chat {
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+list-style-type: none;
+padding: 0;
+margin: 30px;
+margin-top: 30px;
+}
+
+
+.message {
+background-color: rgba(255, 255, 255, 0.9);
+border-radius: 30px;
+box-shadow: 0px 15px 5px 0px rgba(0,0,0,0.5);
+position: relative;
+margin-bottom: 30px;
+max-width: 70%;
+}
+
+
+.message.left {
+padding: 15px 20px 15px 120px;
+}
+
+
+.message.right {
+align-self: flex-end;
+padding: 15px 120px 15px 20px;
+background-color: rgba(31, 146, 212, 0.9);
+color:#fff;
+}
+
+
+.logo {
+border-radius: 50%;
+box-shadow: 0px 10px 10px 0px rgba(0,0,0,0.7);
+object-fit: cover;
+position: absolute;
+left: 10px;
+top: -10px;
+width: 100px;
+height: 100px;
+}
+
+
+.message.right .logo {
+left: auto;
+right: 10px;
+}
+
+
+.message p {
+margin: 0;
+font-size:67px;
+}
+
+
+.text_input {
+font-size: 16px;
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+padding: 10px 15px;
+width: 100%;
+}
+
+
+footer {
+background-color: #222;
+color: #fff;
+font-size: 14px;
+bottom: 0;
+position: fixed;
+left: 0;
+right: 0;
+text-align: center;
+z-index: 999;
+}
+
+
+footer p {
+margin: 10px 0;
+}
+
+
+footer i {
+color: red;
+}
+
+
+footer a {
+color: #3c97bf;
+text-decoration: none;
+}
+</style>
+<div style="height:100px;">
+</div>
+
+
+<div id="painel">
+<h1 style="color:white;">Chat Simulado - Criado por <a href="https://youtube.com/@AndersonMak" target="_blank" class="linkcanal"><strong>@AndersonMak</strong></a> <a href="javascript:start_()" style="padding:10px;font-size:14px;font-weight:bold;color:white;background-color:#3c97bf;">Iniciar</a></h1>
+<br>
+Voz 1<select id="voz1">
+
+<option value="0">Microsoft Adri Online (Natural) - Afrikaans (South Africa)</option><option value="1">Microsoft Willem Online (Natural) - Afrikaans (South Africa)</option><option value="2">Microsoft Anila Online (Natural) - Albanian (Albania)</option><option value="3">Microsoft Ilir Online (Natural) - Albanian (Albania)</option><option value="4">Microsoft Ameha Online (Natural) - Amharic (Ethiopia)</option><option value="5">Microsoft Mekdes Online (Natural) - Amharic (Ethiopia)</option><option value="6">Microsoft Amina Online (Natural) - Arabic (Algeria)</option><option value="7">Microsoft Ismael Online (Natural) - Arabic (Algeria)</option><option value="8">Microsoft Ali Online (Natural) - Arabic (Bahrain)</option><option value="9">Microsoft Laila Online (Natural) - Arabic (Bahrain)</option><option value="10">Microsoft Salma Online (Natural) - Arabic (Egypt)</option><option value="11">Microsoft Shakir Online (Natural) - Arabic (Egypt)</option><option value="12">Microsoft Bassel Online (Natural) - Arabic (Iraq)</option><option value="13">Microsoft Rana Online (Natural) - Arabic (Iraq)</option><option value="14">Microsoft Sana Online (Natural) - Arabic (Jordan)</option><option value="15">Microsoft Taim Online (Natural) - Arabic (Jordan)</option><option value="16">Microsoft Fahed Online (Natural) - Arabic (Kuwait)</option><option value="17">Microsoft Noura Online (Natural) - Arabic (Kuwait)</option><option value="18">Microsoft Layla Online (Natural) - Arabic (Lebanon)</option><option value="19">Microsoft Rami Online (Natural) - Arabic (Lebanon)</option><option value="20">Microsoft Iman Online (Natural) - Arabic (Libya)</option><option value="21">Microsoft Omar Online (Natural) - Arabic (Libya)</option><option value="22">Microsoft Jamal Online (Natural) - Arabic (Morocco)</option><option value="23">Microsoft Mouna Online (Natural) - Arabic (Morocco)</option><option value="24">Microsoft Abdullah Online (Natural) - Arabic (Oman)</option><option value="25">Microsoft Aysha Online (Natural) - Arabic (Oman)</option><option value="26">Microsoft Amal Online (Natural) - Arabic (Qatar)</option><option value="27">Microsoft Moaz Online (Natural) - Arabic (Qatar)</option><option value="28">Microsoft Hamed Online (Natural) - Arabic (Saudi Arabia)</option><option value="29">Microsoft Zariyah Online (Natural) - Arabic (Saudi Arabia)</option><option value="30">Microsoft Amany Online (Natural) - Arabic (Syria)</option><option value="31">Microsoft Laith Online (Natural) - Arabic (Syria)</option><option value="32">Microsoft Hedi Online (Natural) - Arabic (Tunisia)</option><option value="33">Microsoft Reem Online (Natural) - Arabic (Tunisia)</option><option value="34">Microsoft Fatima Online (Natural) - Arabic (United Arab Emirates)</option><option value="35">Microsoft Hamdan Online (Natural) - Arabic (United Arab Emirates)</option><option value="36">Microsoft Maryam Online (Natural) - Arabic (Yemen)</option><option value="37">Microsoft Saleh Online (Natural) - Arabic (Yemen)</option><option value="38">Microsoft Babek Online (Natural) - Azerbaijani (Azerbaijan)</option><option value="39">Microsoft Banu Online (Natural) - Azerbaijani (Azerbaijan)</option><option value="40">Microsoft Nabanita Online (Natural) - Bangla (Bangladesh)</option><option value="41">Microsoft Pradeep Online (Natural) - Bangla (Bangladesh)</option><option value="42">Microsoft Bashkar Online (Natural) - Bangla (India)</option><option value="43">Microsoft Tanishaa Online (Natural) - Bengali (India)</option><option value="44">Microsoft Goran Online (Natural) - Bosnian (Bosnia)</option><option value="45">Microsoft Vesna Online (Natural) - Bosnian (Bosnia)</option><option value="46">Microsoft Borislav Online (Natural) - Bulgarian (Bulgaria)</option><option value="47">Microsoft Kalina Online (Natural) - Bulgarian (Bulgaria)</option><option value="48">Microsoft Nilar Online (Natural) - Burmese (Myanmar)</option><option value="49">Microsoft Thiha Online (Natural) - Burmese (Myanmar)</option><option value="50">Microsoft Enric Online (Natural) - Catalan (Spain)</option><option value="51">Microsoft Joana Online (Natural) - Catalan (Spain)</option><option value="52">Microsoft HiuGaai Online (Natural) - Chinese (Cantonese Traditional)</option><option value="53">Microsoft HiuMaan Online (Natural) - Chinese (Hong Kong)</option><option value="54">Microsoft WanLung Online (Natural) - Chinese (Hong Kong)</option><option value="55">Microsoft Xiaoxiao Online (Natural) - Chinese (Mainland)</option><option value="56">Microsoft Xiaoyi Online (Natural) - Chinese (Mainland)</option><option value="57">Microsoft Yunjian Online (Natural) - Chinese (Mainland)</option><option value="58">Microsoft Yunxi Online (Natural) - Chinese (Mainland)</option><option value="59">Microsoft Yunxia Online (Natural) - Chinese (Mainland)</option><option value="60">Microsoft Yunyang Online (Natural) - Chinese (Mainland)</option><option value="61">Microsoft Xiaobei Online (Natural) - Chinese (Northeastern Mandarin)</option><option value="62">Microsoft HsiaoChen Online (Natural) - Chinese (Taiwan)</option><option value="63">Microsoft YunJhe Online (Natural) - Chinese (Taiwan)</option><option value="64">Microsoft HsiaoYu Online (Natural) - Chinese (Taiwanese Mandarin)</option><option value="65">Microsoft Xiaoni Online (Natural) - Chinese (Zhongyuan Mandarin Shaanxi)</option><option value="66">Microsoft Gabrijela Online (Natural) - Croatian (Croatia)</option><option value="67">Microsoft Srecko Online (Natural) - Croatian (Croatia)</option><option value="68">Microsoft Antonin Online (Natural) - Czech (Czech)</option><option value="69">Microsoft Vlasta Online (Natural) - Czech (Czech)</option><option value="70">Microsoft Christel Online (Natural) - Danish (Denmark)</option><option value="71">Microsoft Jeppe Online (Natural) - Danish (Denmark)</option><option value="72">Microsoft Arnaud Online (Natural) - Dutch (Belgium)</option><option value="73">Microsoft Dena Online (Natural) - Dutch (Belgium)</option><option value="74">Microsoft Colette Online (Natural) - Dutch (Netherlands)</option><option value="75">Microsoft Fenna Online (Natural) - Dutch (Netherlands)</option><option value="76">Microsoft Maarten Online (Natural) - Dutch (Netherlands)</option><option value="77">Microsoft Natasha Online (Natural) - English (Australia)</option><option value="78">Microsoft William Online (Natural) - English (Australia)</option><option value="79">Microsoft Clara Online (Natural) - English (Canada)</option><option value="80">Microsoft Liam Online (Natural) - English (Canada)</option><option value="81">Microsoft Sam Online (Natural) - English (Hongkong)</option><option value="82">Microsoft Yan Online (Natural) - English (Hongkong)</option><option value="83">Microsoft Neerja Online (Natural) - English (India) (Preview)</option><option value="84">Microsoft Neerja Online (Natural) - English (India)</option><option value="85">Microsoft Prabhat Online (Natural) - English (India)</option><option value="86">Microsoft Connor Online (Natural) - English (Ireland)</option><option value="87">Microsoft Emily Online (Natural) - English (Ireland)</option><option value="88">Microsoft Asilia Online (Natural) - English (Kenya)</option><option value="89">Microsoft Chilemba Online (Natural) - English (Kenya)</option><option value="90">Microsoft Mitchell Online (Natural) - English (New Zealand)</option><option value="91">Microsoft Molly Online (Natural) - English (New Zealand)</option><option value="92">Microsoft Abeo Online (Natural) - English (Nigeria)</option><option value="93">Microsoft Ezinne Online (Natural) - English (Nigeria)</option><option value="94">Microsoft James Online (Natural) - English (Philippines)</option><option value="95">Microsoft Rosa Online (Natural) - English (Philippines)</option><option value="96">Microsoft Luna Online (Natural) - English (Singapore)</option><option value="97">Microsoft Wayne Online (Natural) - English (Singapore)</option><option value="98">Microsoft Leah Online (Natural) - English (South Africa)</option><option value="99">Microsoft Luke Online (Natural) - English (South Africa)</option><option value="100">Microsoft Elimu Online (Natural) - English (Tanzania)</option><option value="101">Microsoft Imani Online (Natural) - English (Tanzania)</option><option value="102">Microsoft Libby Online (Natural) - English (United Kingdom)</option><option value="103">Microsoft Maisie Online (Natural) - English (United Kingdom)</option><option value="104">Microsoft Ryan Online (Natural) - English (United Kingdom)</option><option value="105">Microsoft Sonia Online (Natural) - English (United Kingdom)</option><option value="106">Microsoft Thomas Online (Natural) - English (United Kingdom)</option><option value="107">Microsoft Aria Online (Natural) - English (United States)</option><option value="108">Microsoft Ana Online (Natural) - English (United States)</option><option value="109">Microsoft Christopher Online (Natural) - English (United States)</option><option value="110">Microsoft Eric Online (Natural) - English (United States)</option><option value="111">Microsoft Guy Online (Natural) - English (United States)</option><option value="112">Microsoft Jenny Online (Natural) - English (United States)</option><option value="113">Microsoft Michelle Online (Natural) - English (United States)</option><option value="114">Microsoft Roger Online (Natural) - English (United States)</option><option value="115">Microsoft Steffan Online (Natural) - English (United States)</option><option value="116">Microsoft Anu Online (Natural) - Estonian (Estonia)</option><option value="117">Microsoft Kert Online (Natural) - Estonian (Estonia)</option><option value="118">Microsoft Angelo Online (Natural) - Filipino (Philippines)</option><option value="119">Microsoft Blessica Online (Natural) - Filipino (Philippines)</option><option value="120">Microsoft Harri Online (Natural) - Finnish (Finland)</option><option value="121">Microsoft Noora Online (Natural) - Finnish (Finland)</option><option value="122">Microsoft Charline Online (Natural) - French (Belgium)</option><option value="123">Microsoft Gerard Online (Natural) - French (Belgium)</option><option value="124">Microsoft Antoine Online (Natural) - French (Canada)</option><option value="125">Microsoft Jean Online (Natural) - French (Canada)</option><option value="126">Microsoft Sylvie Online (Natural) - French (Canada)</option><option value="127">Microsoft Denise Online (Natural) - French (France)</option><option value="128">Microsoft Eloise Online (Natural) - French (France)</option><option value="129">Microsoft Henri Online (Natural) - French (France)</option><option value="130">Microsoft Ariane Online (Natural) - French (Switzerland)</option><option value="131">Microsoft Fabrice Online (Natural) - French (Switzerland)</option><option value="132">Microsoft Roi Online (Natural) - Galician (Spain)</option><option value="133">Microsoft Sabela Online (Natural) - Galician (Spain)</option><option value="134">Microsoft Eka Online (Natural) - Georgian (Georgia)</option><option value="135">Microsoft Giorgi Online (Natural) - Georgian (Georgia)</option><option value="136">Microsoft Ingrid Online (Natural) - German (Austria)</option><option value="137">Microsoft Jonas Online (Natural) - German (Austria)</option><option value="138">Microsoft Amala Online (Natural) - German (Germany)</option><option value="139">Microsoft Conrad Online (Natural) - German (Germany)</option><option value="140">Microsoft Katja Online (Natural) - German (Germany)</option><option value="141">Microsoft Killian Online (Natural) - German (Germany)</option><option value="142">Microsoft Jan Online (Natural) - German (Switzerland)</option><option value="143">Microsoft Leni Online (Natural) - German (Switzerland)</option><option value="144">Microsoft Athina Online (Natural) - Greek (Greece)</option><option value="145">Microsoft Nestoras Online (Natural) - Greek (Greece)</option><option value="146">Microsoft Dhwani Online (Natural) - Gujarati (India)</option><option value="147">Microsoft Niranjan Online (Natural) - Gujarati (India)</option><option value="148">Microsoft Avri Online (Natural) - Hebrew (Israel)</option><option value="149">Microsoft Hila Online (Natural) - Hebrew (Israel)</option><option value="150">Microsoft Madhur Online (Natural) - Hindi (India)</option><option value="151">Microsoft Swara Online (Natural) - Hindi (India)</option><option value="152">Microsoft Noemi Online (Natural) - Hungarian (Hungary)</option><option value="153">Microsoft Tamas Online (Natural) - Hungarian (Hungary)</option><option value="154">Microsoft Gudrun Online (Natural) - Icelandic (Iceland)</option><option value="155">Microsoft Gunnar Online (Natural) - Icelandic (Iceland)</option><option value="156">Microsoft Ardi Online (Natural) - Indonesian (Indonesia)</option><option value="157">Microsoft Gadis Online (Natural) - Indonesian (Indonesia)</option><option value="158">Microsoft Colm Online (Natural) - Irish (Ireland)</option><option value="159">Microsoft Orla Online (Natural) - Irish (Ireland)</option><option value="160">Microsoft Diego Online (Natural) - Italian (Italy)</option><option value="161">Microsoft Elsa Online (Natural) - Italian (Italy)</option><option value="162">Microsoft Isabella Online (Natural) - Italian (Italy)</option><option value="163">Microsoft Keita Online (Natural) - Japanese (Japan)</option><option value="164">Microsoft Nanami Online (Natural) - Japanese (Japan)</option><option value="165">Microsoft Dimas Online (Natural) - Javanese (Indonesia)</option><option value="166">Microsoft Siti Online (Natural) - Javanese (Indonesia)</option><option value="167">Microsoft Gagan Online (Natural) - Kannada (India)</option><option value="168">Microsoft Sapna Online (Natural) - Kannada (India)</option><option value="169">Microsoft Aigul Online (Natural) - Kazakh (Kazakhstan)</option><option value="170">Microsoft Daulet Online (Natural) - Kazakh (Kazakhstan)</option><option value="171">Microsoft Piseth Online (Natural) - Khmer (Cambodia)</option><option value="172">Microsoft Sreymom Online (Natural) - Khmer (Cambodia)</option><option value="173">Microsoft InJoon Online (Natural) - Korean (Korea)</option><option value="174">Microsoft SunHi Online (Natural) - Korean (Korea)</option><option value="175">Microsoft Chanthavong Online (Natural) - Lao (Laos)</option><option value="176">Microsoft Keomany Online (Natural) - Lao (Laos)</option><option value="177">Microsoft Everita Online (Natural) - Latvian (Latvia)</option><option value="178">Microsoft Nils Online (Natural) - Latvian (Latvia)</option><option value="179">Microsoft Leonas Online (Natural) - Lithuanian (Lithuania)</option><option value="180">Microsoft Ona Online (Natural) - Lithuanian (Lithuania)</option><option value="181">Microsoft Aleksandar Online (Natural) - Macedonian (Republic of North Macedonia)</option><option value="182">Microsoft Marija Online (Natural) - Macedonian (Republic of North Macedonia)</option><option value="183">Microsoft Osman Online (Natural) - Malay (Malaysia)</option><option value="184">Microsoft Yasmin Online (Natural) - Malay (Malaysia)</option><option value="185">Microsoft Midhun Online (Natural) - Malayalam (India)</option><option value="186">Microsoft Sobhana Online (Natural) - Malayalam (India)</option><option value="187">Microsoft Grace Online (Natural) - Maltese (Malta)</option><option value="188">Microsoft Joseph Online (Natural) - Maltese (Malta)</option><option value="189">Microsoft Aarohi Online (Natural) - Marathi (India)</option><option value="190">Microsoft Manohar Online (Natural) - Marathi (India)</option><option value="191">Microsoft Bataa Online (Natural) - Mongolian (Mongolia)</option><option value="192">Microsoft Yesui Online (Natural) - Mongolian (Mongolia)</option><option value="193">Microsoft Hemkala Online (Natural) - Nepali (Nepal)</option><option value="194">Microsoft Sagar Online (Natural) - Nepali (Nepal)</option><option value="195">Microsoft Finn Online (Natural) - Norwegian (Bokm�l Norway)</option><option value="196">Microsoft Pernille Online (Natural) - Norwegian (Bokm�l, Norway)</option><option value="197">Microsoft GulNawaz Online (Natural) - Pashto (Afghanistan)</option><option value="198">Microsoft Latifa Online (Natural) - Pashto (Afghanistan)</option><option value="199">Microsoft Dilara Online (Natural) - Persian (Iran)</option><option value="200">Microsoft Farid Online (Natural) - Persian (Iran)</option><option value="201">Microsoft Marek Online (Natural) - Polish (Poland)</option><option value="202">Microsoft Zofia Online (Natural) - Polish (Poland)</option><option value="203">Microsoft Antonio Online (Natural) - Portuguese (Brazil)</option><option value="204">Microsoft Francisca Online (Natural) - Portuguese (Brazil)</option><option value="205">Microsoft Duarte Online (Natural) - Portuguese (Portugal)</option><option value="206">Microsoft Raquel Online (Natural) - Portuguese (Portugal)</option><option value="207">Microsoft Alina Online (Natural) - Romanian (Romania)</option><option value="208">Microsoft Emil Online (Natural) - Romanian (Romania)</option><option value="209">Microsoft Dmitry Online (Natural) - Russian (Russia)</option><option value="210">Microsoft Svetlana Online (Natural) - Russian (Russia)</option><option value="211">Microsoft Nicholas Online (Natural) - Serbian (Serbia)</option><option value="212">Microsoft Sophie Online (Natural) - Serbian (Serbia)</option><option value="213">Microsoft Sameera Online (Natural) - Sinhala (Sri Lanka)</option><option value="214">Microsoft Thilini Online (Natural) - Sinhala (Sri Lanka)</option><option value="215">Microsoft Lukas Online (Natural) - Slovak (Slovakia)</option><option value="216">Microsoft Viktoria Online (Natural) - Slovak (Slovakia)</option><option value="217">Microsoft Petra Online (Natural) - Slovenian (Slovenia)</option><option value="218">Microsoft Rok Online (Natural) - Slovenian (Slovenia)</option><option value="219">Microsoft Muuse Online (Natural) - Somali (Somalia)</option><option value="220">Microsoft Ubax Online (Natural) - Somali (Somalia)</option><option value="221">Microsoft Elena Online (Natural) - Spanish (Argentina)</option><option value="222">Microsoft Tomas Online (Natural) - Spanish (Argentina)</option><option value="223">Microsoft Marcelo Online (Natural) - Spanish (Bolivia)</option><option value="224">Microsoft Sofia Online (Natural) - Spanish (Bolivia)</option><option value="225">Microsoft Catalina Online (Natural) - Spanish (Chile)</option><option value="226">Microsoft Lorenzo Online (Natural) - Spanish (Chile)</option><option value="227">Microsoft Gonzalo Online (Natural) - Spanish (Colombia)</option><option value="228">Microsoft Salome Online (Natural) - Spanish (Colombia)</option><option value="229">Microsoft Juan Online (Natural) - Spanish (Costa Rica)</option><option value="230">Microsoft Maria Online (Natural) - Spanish (Costa Rica)</option><option value="231">Microsoft Belkys Online (Natural) - Spanish (Cuba)</option><option value="232">Microsoft Manuel Online (Natural) - Spanish (Cuba)</option><option value="233">Microsoft Emilio Online (Natural) - Spanish (Dominican Republic)</option><option value="234">Microsoft Ramona Online (Natural) - Spanish (Dominican Republic)</option><option value="235">Microsoft Andrea Online (Natural) - Spanish (Ecuador)</option><option value="236">Microsoft Luis Online (Natural) - Spanish (Ecuador)</option><option value="237">Microsoft Lorena Online (Natural) - Spanish (El Salvador)</option><option value="238">Microsoft Rodrigo Online (Natural) - Spanish (El Salvador)</option><option value="239">Microsoft Javier Online (Natural) - Spanish (Equatorial Guinea)</option><option value="240">Microsoft Teresa Online (Natural) - Spanish (Equatorial Guinea)</option><option value="241">Microsoft Andres Online (Natural) - Spanish (Guatemala)</option><option value="242">Microsoft Marta Online (Natural) - Spanish (Guatemala)</option><option value="243">Microsoft Carlos Online (Natural) - Spanish (Honduras)</option><option value="244">Microsoft Karla Online (Natural) - Spanish (Honduras)</option><option value="245">Microsoft Dalia Online (Natural) - Spanish (Mexico)</option><option value="246">Microsoft Jorge Online (Natural) - Spanish (Mexico)</option><option value="247">Microsoft Federico Online (Natural) - Spanish (Nicaragua)</option><option value="248">Microsoft Yolanda Online (Natural) - Spanish (Nicaragua)</option><option value="249">Microsoft Margarita Online (Natural) - Spanish (Panama)</option><option value="250">Microsoft Roberto Online (Natural) - Spanish (Panama)</option><option value="251">Microsoft Mario Online (Natural) - Spanish (Paraguay)</option><option value="252">Microsoft Tania Online (Natural) - Spanish (Paraguay)</option><option value="253">Microsoft Alex Online (Natural) - Spanish (Peru)</option><option value="254">Microsoft Camila Online (Natural) - Spanish (Peru)</option><option value="255">Microsoft Karina Online (Natural) - Spanish (Puerto Rico)</option><option value="256">Microsoft Victor Online (Natural) - Spanish (Puerto Rico)</option><option value="257">Microsoft Alvaro Online (Natural) - Spanish (Spain)</option><option value="258">Microsoft Elvira Online (Natural) - Spanish (Spain)</option><option value="259">Microsoft Alonso Online (Natural) - Spanish (United States)</option><option value="260">Microsoft Paloma Online (Natural) - Spanish (United States)</option><option value="261">Microsoft Mateo Online (Natural) - Spanish (Uruguay)</option><option value="262">Microsoft Valentina Online (Natural) - Spanish (Uruguay)</option><option value="263">Microsoft Paola Online (Natural) - Spanish (Venezuela)</option><option value="264">Microsoft Sebastian Online (Natural) - Spanish (Venezuela)</option><option value="265">Microsoft Jajang Online (Natural) - Sundanese (Indonesia)</option><option value="266">Microsoft Tuti Online (Natural) - Sundanese (Indonesia)</option><option value="267">Microsoft Rafiki Online (Natural) - Swahili (Kenya)</option><option value="268">Microsoft Zuri Online (Natural) - Swahili (Kenya)</option><option value="269">Microsoft Daudi Online (Natural) - Swahili (Tanzania)</option><option value="270">Microsoft Rehema Online (Natural) - Swahili (Tanzania)</option><option value="271">Microsoft Mattias Online (Natural) - Swedish (Sweden)</option><option value="272">Microsoft Sofie Online (Natural) - Swedish (Sweden)</option><option value="273">Microsoft Pallavi Online (Natural) - Tamil (India)</option><option value="274">Microsoft Valluvar Online (Natural) - Tamil (India)</option><option value="275">Microsoft Kani Online (Natural) - Tamil (Malaysia)</option><option value="276">Microsoft Surya Online (Natural) - Tamil (Malaysia)</option><option value="277">Microsoft Anbu Online (Natural) - Tamil (Singapore)</option><option value="278">Microsoft Venba Online (Natural) - Tamil (Singapore)</option><option value="279">Microsoft Kumar Online (Natural) - Tamil (Sri Lanka)</option><option value="280">Microsoft Saranya Online (Natural) - Tamil (Sri Lanka)</option><option value="281">Microsoft Mohan Online (Natural) - Telugu (India)</option><option value="282">Microsoft Shruti Online (Natural) - Telugu (India)</option><option value="283">Microsoft Niwat Online (Natural) - Thai (Thailand)</option><option value="284">Microsoft Premwadee Online (Natural) - Thai (Thailand)</option><option value="285">Microsoft Ahmet Online (Natural) - Turkish (Turkey)</option><option value="286">Microsoft Emel Online (Natural) - Turkish (Turkey)</option><option value="287">Microsoft Ostap Online (Natural) - Ukrainian (Ukraine)</option><option value="288">Microsoft Polina Online (Natural) - Ukrainian (Ukraine)</option><option value="289">Microsoft Gul Online (Natural) - Urdu (India)</option><option value="290">Microsoft Salman Online (Natural) - Urdu (India)</option><option value="291">Microsoft Asad Online (Natural) - Urdu (Pakistan)</option><option value="292">Microsoft Uzma Online (Natural) - Urdu (Pakistan)</option><option value="293">Microsoft Madina Online (Natural) - Uzbek (Uzbekistan)</option><option value="294">Microsoft Sardor Online (Natural) - Uzbek (Uzbekistan)</option><option value="295">Microsoft HoaiMy Online (Natural) - Vietnamese (Vietnam)</option><option value="296">Microsoft NamMinh Online (Natural) - Vietnamese (Vietnam)</option><option value="297">Microsoft Aled Online (Natural) - Welsh (United Kingdom)</option><option value="298">Microsoft Nia Online (Natural) - Welsh (United Kingdom)</option><option value="299">Microsoft Thando Online (Natural) - Zulu (South Africa)</option><option value="300">Microsoft Themba Online (Natural) - Zulu (South Africa)</option></select> Img Avatar: <input type="text" placeholder="Coloque a Url da Imagem Aqui" width="400" id="img1" value="https://randomuser.me/api/portraits/women/17.jpg">
+<br>
+Voz 2<select id="voz2">
+
+<option value="0">Microsoft Adri Online (Natural) - Afrikaans (South Africa)</option><option value="1">Microsoft Willem Online (Natural) - Afrikaans (South Africa)</option><option value="2">Microsoft Anila Online (Natural) - Albanian (Albania)</option><option value="3">Microsoft Ilir Online (Natural) - Albanian (Albania)</option><option value="4">Microsoft Ameha Online (Natural) - Amharic (Ethiopia)</option><option value="5">Microsoft Mekdes Online (Natural) - Amharic (Ethiopia)</option><option value="6">Microsoft Amina Online (Natural) - Arabic (Algeria)</option><option value="7">Microsoft Ismael Online (Natural) - Arabic (Algeria)</option><option value="8">Microsoft Ali Online (Natural) - Arabic (Bahrain)</option><option value="9">Microsoft Laila Online (Natural) - Arabic (Bahrain)</option><option value="10">Microsoft Salma Online (Natural) - Arabic (Egypt)</option><option value="11">Microsoft Shakir Online (Natural) - Arabic (Egypt)</option><option value="12">Microsoft Bassel Online (Natural) - Arabic (Iraq)</option><option value="13">Microsoft Rana Online (Natural) - Arabic (Iraq)</option><option value="14">Microsoft Sana Online (Natural) - Arabic (Jordan)</option><option value="15">Microsoft Taim Online (Natural) - Arabic (Jordan)</option><option value="16">Microsoft Fahed Online (Natural) - Arabic (Kuwait)</option><option value="17">Microsoft Noura Online (Natural) - Arabic (Kuwait)</option><option value="18">Microsoft Layla Online (Natural) - Arabic (Lebanon)</option><option value="19">Microsoft Rami Online (Natural) - Arabic (Lebanon)</option><option value="20">Microsoft Iman Online (Natural) - Arabic (Libya)</option><option value="21">Microsoft Omar Online (Natural) - Arabic (Libya)</option><option value="22">Microsoft Jamal Online (Natural) - Arabic (Morocco)</option><option value="23">Microsoft Mouna Online (Natural) - Arabic (Morocco)</option><option value="24">Microsoft Abdullah Online (Natural) - Arabic (Oman)</option><option value="25">Microsoft Aysha Online (Natural) - Arabic (Oman)</option><option value="26">Microsoft Amal Online (Natural) - Arabic (Qatar)</option><option value="27">Microsoft Moaz Online (Natural) - Arabic (Qatar)</option><option value="28">Microsoft Hamed Online (Natural) - Arabic (Saudi Arabia)</option><option value="29">Microsoft Zariyah Online (Natural) - Arabic (Saudi Arabia)</option><option value="30">Microsoft Amany Online (Natural) - Arabic (Syria)</option><option value="31">Microsoft Laith Online (Natural) - Arabic (Syria)</option><option value="32">Microsoft Hedi Online (Natural) - Arabic (Tunisia)</option><option value="33">Microsoft Reem Online (Natural) - Arabic (Tunisia)</option><option value="34">Microsoft Fatima Online (Natural) - Arabic (United Arab Emirates)</option><option value="35">Microsoft Hamdan Online (Natural) - Arabic (United Arab Emirates)</option><option value="36">Microsoft Maryam Online (Natural) - Arabic (Yemen)</option><option value="37">Microsoft Saleh Online (Natural) - Arabic (Yemen)</option><option value="38">Microsoft Babek Online (Natural) - Azerbaijani (Azerbaijan)</option><option value="39">Microsoft Banu Online (Natural) - Azerbaijani (Azerbaijan)</option><option value="40">Microsoft Nabanita Online (Natural) - Bangla (Bangladesh)</option><option value="41">Microsoft Pradeep Online (Natural) - Bangla (Bangladesh)</option><option value="42">Microsoft Bashkar Online (Natural) - Bangla (India)</option><option value="43">Microsoft Tanishaa Online (Natural) - Bengali (India)</option><option value="44">Microsoft Goran Online (Natural) - Bosnian (Bosnia)</option><option value="45">Microsoft Vesna Online (Natural) - Bosnian (Bosnia)</option><option value="46">Microsoft Borislav Online (Natural) - Bulgarian (Bulgaria)</option><option value="47">Microsoft Kalina Online (Natural) - Bulgarian (Bulgaria)</option><option value="48">Microsoft Nilar Online (Natural) - Burmese (Myanmar)</option><option value="49">Microsoft Thiha Online (Natural) - Burmese (Myanmar)</option><option value="50">Microsoft Enric Online (Natural) - Catalan (Spain)</option><option value="51">Microsoft Joana Online (Natural) - Catalan (Spain)</option><option value="52">Microsoft HiuGaai Online (Natural) - Chinese (Cantonese Traditional)</option><option value="53">Microsoft HiuMaan Online (Natural) - Chinese (Hong Kong)</option><option value="54">Microsoft WanLung Online (Natural) - Chinese (Hong Kong)</option><option value="55">Microsoft Xiaoxiao Online (Natural) - Chinese (Mainland)</option><option value="56">Microsoft Xiaoyi Online (Natural) - Chinese (Mainland)</option><option value="57">Microsoft Yunjian Online (Natural) - Chinese (Mainland)</option><option value="58">Microsoft Yunxi Online (Natural) - Chinese (Mainland)</option><option value="59">Microsoft Yunxia Online (Natural) - Chinese (Mainland)</option><option value="60">Microsoft Yunyang Online (Natural) - Chinese (Mainland)</option><option value="61">Microsoft Xiaobei Online (Natural) - Chinese (Northeastern Mandarin)</option><option value="62">Microsoft HsiaoChen Online (Natural) - Chinese (Taiwan)</option><option value="63">Microsoft YunJhe Online (Natural) - Chinese (Taiwan)</option><option value="64">Microsoft HsiaoYu Online (Natural) - Chinese (Taiwanese Mandarin)</option><option value="65">Microsoft Xiaoni Online (Natural) - Chinese (Zhongyuan Mandarin Shaanxi)</option><option value="66">Microsoft Gabrijela Online (Natural) - Croatian (Croatia)</option><option value="67">Microsoft Srecko Online (Natural) - Croatian (Croatia)</option><option value="68">Microsoft Antonin Online (Natural) - Czech (Czech)</option><option value="69">Microsoft Vlasta Online (Natural) - Czech (Czech)</option><option value="70">Microsoft Christel Online (Natural) - Danish (Denmark)</option><option value="71">Microsoft Jeppe Online (Natural) - Danish (Denmark)</option><option value="72">Microsoft Arnaud Online (Natural) - Dutch (Belgium)</option><option value="73">Microsoft Dena Online (Natural) - Dutch (Belgium)</option><option value="74">Microsoft Colette Online (Natural) - Dutch (Netherlands)</option><option value="75">Microsoft Fenna Online (Natural) - Dutch (Netherlands)</option><option value="76">Microsoft Maarten Online (Natural) - Dutch (Netherlands)</option><option value="77">Microsoft Natasha Online (Natural) - English (Australia)</option><option value="78">Microsoft William Online (Natural) - English (Australia)</option><option value="79">Microsoft Clara Online (Natural) - English (Canada)</option><option value="80">Microsoft Liam Online (Natural) - English (Canada)</option><option value="81">Microsoft Sam Online (Natural) - English (Hongkong)</option><option value="82">Microsoft Yan Online (Natural) - English (Hongkong)</option><option value="83">Microsoft Neerja Online (Natural) - English (India) (Preview)</option><option value="84">Microsoft Neerja Online (Natural) - English (India)</option><option value="85">Microsoft Prabhat Online (Natural) - English (India)</option><option value="86">Microsoft Connor Online (Natural) - English (Ireland)</option><option value="87">Microsoft Emily Online (Natural) - English (Ireland)</option><option value="88">Microsoft Asilia Online (Natural) - English (Kenya)</option><option value="89">Microsoft Chilemba Online (Natural) - English (Kenya)</option><option value="90">Microsoft Mitchell Online (Natural) - English (New Zealand)</option><option value="91">Microsoft Molly Online (Natural) - English (New Zealand)</option><option value="92">Microsoft Abeo Online (Natural) - English (Nigeria)</option><option value="93">Microsoft Ezinne Online (Natural) - English (Nigeria)</option><option value="94">Microsoft James Online (Natural) - English (Philippines)</option><option value="95">Microsoft Rosa Online (Natural) - English (Philippines)</option><option value="96">Microsoft Luna Online (Natural) - English (Singapore)</option><option value="97">Microsoft Wayne Online (Natural) - English (Singapore)</option><option value="98">Microsoft Leah Online (Natural) - English (South Africa)</option><option value="99">Microsoft Luke Online (Natural) - English (South Africa)</option><option value="100">Microsoft Elimu Online (Natural) - English (Tanzania)</option><option value="101">Microsoft Imani Online (Natural) - English (Tanzania)</option><option value="102">Microsoft Libby Online (Natural) - English (United Kingdom)</option><option value="103">Microsoft Maisie Online (Natural) - English (United Kingdom)</option><option value="104">Microsoft Ryan Online (Natural) - English (United Kingdom)</option><option value="105">Microsoft Sonia Online (Natural) - English (United Kingdom)</option><option value="106">Microsoft Thomas Online (Natural) - English (United Kingdom)</option><option value="107">Microsoft Aria Online (Natural) - English (United States)</option><option value="108">Microsoft Ana Online (Natural) - English (United States)</option><option value="109">Microsoft Christopher Online (Natural) - English (United States)</option><option value="110">Microsoft Eric Online (Natural) - English (United States)</option><option value="111">Microsoft Guy Online (Natural) - English (United States)</option><option value="112">Microsoft Jenny Online (Natural) - English (United States)</option><option value="113">Microsoft Michelle Online (Natural) - English (United States)</option><option value="114">Microsoft Roger Online (Natural) - English (United States)</option><option value="115">Microsoft Steffan Online (Natural) - English (United States)</option><option value="116">Microsoft Anu Online (Natural) - Estonian (Estonia)</option><option value="117">Microsoft Kert Online (Natural) - Estonian (Estonia)</option><option value="118">Microsoft Angelo Online (Natural) - Filipino (Philippines)</option><option value="119">Microsoft Blessica Online (Natural) - Filipino (Philippines)</option><option value="120">Microsoft Harri Online (Natural) - Finnish (Finland)</option><option value="121">Microsoft Noora Online (Natural) - Finnish (Finland)</option><option value="122">Microsoft Charline Online (Natural) - French (Belgium)</option><option value="123">Microsoft Gerard Online (Natural) - French (Belgium)</option><option value="124">Microsoft Antoine Online (Natural) - French (Canada)</option><option value="125">Microsoft Jean Online (Natural) - French (Canada)</option><option value="126">Microsoft Sylvie Online (Natural) - French (Canada)</option><option value="127">Microsoft Denise Online (Natural) - French (France)</option><option value="128">Microsoft Eloise Online (Natural) - French (France)</option><option value="129">Microsoft Henri Online (Natural) - French (France)</option><option value="130">Microsoft Ariane Online (Natural) - French (Switzerland)</option><option value="131">Microsoft Fabrice Online (Natural) - French (Switzerland)</option><option value="132">Microsoft Roi Online (Natural) - Galician (Spain)</option><option value="133">Microsoft Sabela Online (Natural) - Galician (Spain)</option><option value="134">Microsoft Eka Online (Natural) - Georgian (Georgia)</option><option value="135">Microsoft Giorgi Online (Natural) - Georgian (Georgia)</option><option value="136">Microsoft Ingrid Online (Natural) - German (Austria)</option><option value="137">Microsoft Jonas Online (Natural) - German (Austria)</option><option value="138">Microsoft Amala Online (Natural) - German (Germany)</option><option value="139">Microsoft Conrad Online (Natural) - German (Germany)</option><option value="140">Microsoft Katja Online (Natural) - German (Germany)</option><option value="141">Microsoft Killian Online (Natural) - German (Germany)</option><option value="142">Microsoft Jan Online (Natural) - German (Switzerland)</option><option value="143">Microsoft Leni Online (Natural) - German (Switzerland)</option><option value="144">Microsoft Athina Online (Natural) - Greek (Greece)</option><option value="145">Microsoft Nestoras Online (Natural) - Greek (Greece)</option><option value="146">Microsoft Dhwani Online (Natural) - Gujarati (India)</option><option value="147">Microsoft Niranjan Online (Natural) - Gujarati (India)</option><option value="148">Microsoft Avri Online (Natural) - Hebrew (Israel)</option><option value="149">Microsoft Hila Online (Natural) - Hebrew (Israel)</option><option value="150">Microsoft Madhur Online (Natural) - Hindi (India)</option><option value="151">Microsoft Swara Online (Natural) - Hindi (India)</option><option value="152">Microsoft Noemi Online (Natural) - Hungarian (Hungary)</option><option value="153">Microsoft Tamas Online (Natural) - Hungarian (Hungary)</option><option value="154">Microsoft Gudrun Online (Natural) - Icelandic (Iceland)</option><option value="155">Microsoft Gunnar Online (Natural) - Icelandic (Iceland)</option><option value="156">Microsoft Ardi Online (Natural) - Indonesian (Indonesia)</option><option value="157">Microsoft Gadis Online (Natural) - Indonesian (Indonesia)</option><option value="158">Microsoft Colm Online (Natural) - Irish (Ireland)</option><option value="159">Microsoft Orla Online (Natural) - Irish (Ireland)</option><option value="160">Microsoft Diego Online (Natural) - Italian (Italy)</option><option value="161">Microsoft Elsa Online (Natural) - Italian (Italy)</option><option value="162">Microsoft Isabella Online (Natural) - Italian (Italy)</option><option value="163">Microsoft Keita Online (Natural) - Japanese (Japan)</option><option value="164">Microsoft Nanami Online (Natural) - Japanese (Japan)</option><option value="165">Microsoft Dimas Online (Natural) - Javanese (Indonesia)</option><option value="166">Microsoft Siti Online (Natural) - Javanese (Indonesia)</option><option value="167">Microsoft Gagan Online (Natural) - Kannada (India)</option><option value="168">Microsoft Sapna Online (Natural) - Kannada (India)</option><option value="169">Microsoft Aigul Online (Natural) - Kazakh (Kazakhstan)</option><option value="170">Microsoft Daulet Online (Natural) - Kazakh (Kazakhstan)</option><option value="171">Microsoft Piseth Online (Natural) - Khmer (Cambodia)</option><option value="172">Microsoft Sreymom Online (Natural) - Khmer (Cambodia)</option><option value="173">Microsoft InJoon Online (Natural) - Korean (Korea)</option><option value="174">Microsoft SunHi Online (Natural) - Korean (Korea)</option><option value="175">Microsoft Chanthavong Online (Natural) - Lao (Laos)</option><option value="176">Microsoft Keomany Online (Natural) - Lao (Laos)</option><option value="177">Microsoft Everita Online (Natural) - Latvian (Latvia)</option><option value="178">Microsoft Nils Online (Natural) - Latvian (Latvia)</option><option value="179">Microsoft Leonas Online (Natural) - Lithuanian (Lithuania)</option><option value="180">Microsoft Ona Online (Natural) - Lithuanian (Lithuania)</option><option value="181">Microsoft Aleksandar Online (Natural) - Macedonian (Republic of North Macedonia)</option><option value="182">Microsoft Marija Online (Natural) - Macedonian (Republic of North Macedonia)</option><option value="183">Microsoft Osman Online (Natural) - Malay (Malaysia)</option><option value="184">Microsoft Yasmin Online (Natural) - Malay (Malaysia)</option><option value="185">Microsoft Midhun Online (Natural) - Malayalam (India)</option><option value="186">Microsoft Sobhana Online (Natural) - Malayalam (India)</option><option value="187">Microsoft Grace Online (Natural) - Maltese (Malta)</option><option value="188">Microsoft Joseph Online (Natural) - Maltese (Malta)</option><option value="189">Microsoft Aarohi Online (Natural) - Marathi (India)</option><option value="190">Microsoft Manohar Online (Natural) - Marathi (India)</option><option value="191">Microsoft Bataa Online (Natural) - Mongolian (Mongolia)</option><option value="192">Microsoft Yesui Online (Natural) - Mongolian (Mongolia)</option><option value="193">Microsoft Hemkala Online (Natural) - Nepali (Nepal)</option><option value="194">Microsoft Sagar Online (Natural) - Nepali (Nepal)</option><option value="195">Microsoft Finn Online (Natural) - Norwegian (Bokm�l Norway)</option><option value="196">Microsoft Pernille Online (Natural) - Norwegian (Bokm�l, Norway)</option><option value="197">Microsoft GulNawaz Online (Natural) - Pashto (Afghanistan)</option><option value="198">Microsoft Latifa Online (Natural) - Pashto (Afghanistan)</option><option value="199">Microsoft Dilara Online (Natural) - Persian (Iran)</option><option value="200">Microsoft Farid Online (Natural) - Persian (Iran)</option><option value="201">Microsoft Marek Online (Natural) - Polish (Poland)</option><option value="202">Microsoft Zofia Online (Natural) - Polish (Poland)</option><option value="203">Microsoft Antonio Online (Natural) - Portuguese (Brazil)</option><option value="204">Microsoft Francisca Online (Natural) - Portuguese (Brazil)</option><option value="205">Microsoft Duarte Online (Natural) - Portuguese (Portugal)</option><option value="206">Microsoft Raquel Online (Natural) - Portuguese (Portugal)</option><option value="207">Microsoft Alina Online (Natural) - Romanian (Romania)</option><option value="208">Microsoft Emil Online (Natural) - Romanian (Romania)</option><option value="209">Microsoft Dmitry Online (Natural) - Russian (Russia)</option><option value="210">Microsoft Svetlana Online (Natural) - Russian (Russia)</option><option value="211">Microsoft Nicholas Online (Natural) - Serbian (Serbia)</option><option value="212">Microsoft Sophie Online (Natural) - Serbian (Serbia)</option><option value="213">Microsoft Sameera Online (Natural) - Sinhala (Sri Lanka)</option><option value="214">Microsoft Thilini Online (Natural) - Sinhala (Sri Lanka)</option><option value="215">Microsoft Lukas Online (Natural) - Slovak (Slovakia)</option><option value="216">Microsoft Viktoria Online (Natural) - Slovak (Slovakia)</option><option value="217">Microsoft Petra Online (Natural) - Slovenian (Slovenia)</option><option value="218">Microsoft Rok Online (Natural) - Slovenian (Slovenia)</option><option value="219">Microsoft Muuse Online (Natural) - Somali (Somalia)</option><option value="220">Microsoft Ubax Online (Natural) - Somali (Somalia)</option><option value="221">Microsoft Elena Online (Natural) - Spanish (Argentina)</option><option value="222">Microsoft Tomas Online (Natural) - Spanish (Argentina)</option><option value="223">Microsoft Marcelo Online (Natural) - Spanish (Bolivia)</option><option value="224">Microsoft Sofia Online (Natural) - Spanish (Bolivia)</option><option value="225">Microsoft Catalina Online (Natural) - Spanish (Chile)</option><option value="226">Microsoft Lorenzo Online (Natural) - Spanish (Chile)</option><option value="227">Microsoft Gonzalo Online (Natural) - Spanish (Colombia)</option><option value="228">Microsoft Salome Online (Natural) - Spanish (Colombia)</option><option value="229">Microsoft Juan Online (Natural) - Spanish (Costa Rica)</option><option value="230">Microsoft Maria Online (Natural) - Spanish (Costa Rica)</option><option value="231">Microsoft Belkys Online (Natural) - Spanish (Cuba)</option><option value="232">Microsoft Manuel Online (Natural) - Spanish (Cuba)</option><option value="233">Microsoft Emilio Online (Natural) - Spanish (Dominican Republic)</option><option value="234">Microsoft Ramona Online (Natural) - Spanish (Dominican Republic)</option><option value="235">Microsoft Andrea Online (Natural) - Spanish (Ecuador)</option><option value="236">Microsoft Luis Online (Natural) - Spanish (Ecuador)</option><option value="237">Microsoft Lorena Online (Natural) - Spanish (El Salvador)</option><option value="238">Microsoft Rodrigo Online (Natural) - Spanish (El Salvador)</option><option value="239">Microsoft Javier Online (Natural) - Spanish (Equatorial Guinea)</option><option value="240">Microsoft Teresa Online (Natural) - Spanish (Equatorial Guinea)</option><option value="241">Microsoft Andres Online (Natural) - Spanish (Guatemala)</option><option value="242">Microsoft Marta Online (Natural) - Spanish (Guatemala)</option><option value="243">Microsoft Carlos Online (Natural) - Spanish (Honduras)</option><option value="244">Microsoft Karla Online (Natural) - Spanish (Honduras)</option><option value="245">Microsoft Dalia Online (Natural) - Spanish (Mexico)</option><option value="246">Microsoft Jorge Online (Natural) - Spanish (Mexico)</option><option value="247">Microsoft Federico Online (Natural) - Spanish (Nicaragua)</option><option value="248">Microsoft Yolanda Online (Natural) - Spanish (Nicaragua)</option><option value="249">Microsoft Margarita Online (Natural) - Spanish (Panama)</option><option value="250">Microsoft Roberto Online (Natural) - Spanish (Panama)</option><option value="251">Microsoft Mario Online (Natural) - Spanish (Paraguay)</option><option value="252">Microsoft Tania Online (Natural) - Spanish (Paraguay)</option><option value="253">Microsoft Alex Online (Natural) - Spanish (Peru)</option><option value="254">Microsoft Camila Online (Natural) - Spanish (Peru)</option><option value="255">Microsoft Karina Online (Natural) - Spanish (Puerto Rico)</option><option value="256">Microsoft Victor Online (Natural) - Spanish (Puerto Rico)</option><option value="257">Microsoft Alvaro Online (Natural) - Spanish (Spain)</option><option value="258">Microsoft Elvira Online (Natural) - Spanish (Spain)</option><option value="259">Microsoft Alonso Online (Natural) - Spanish (United States)</option><option value="260">Microsoft Paloma Online (Natural) - Spanish (United States)</option><option value="261">Microsoft Mateo Online (Natural) - Spanish (Uruguay)</option><option value="262">Microsoft Valentina Online (Natural) - Spanish (Uruguay)</option><option value="263">Microsoft Paola Online (Natural) - Spanish (Venezuela)</option><option value="264">Microsoft Sebastian Online (Natural) - Spanish (Venezuela)</option><option value="265">Microsoft Jajang Online (Natural) - Sundanese (Indonesia)</option><option value="266">Microsoft Tuti Online (Natural) - Sundanese (Indonesia)</option><option value="267">Microsoft Rafiki Online (Natural) - Swahili (Kenya)</option><option value="268">Microsoft Zuri Online (Natural) - Swahili (Kenya)</option><option value="269">Microsoft Daudi Online (Natural) - Swahili (Tanzania)</option><option value="270">Microsoft Rehema Online (Natural) - Swahili (Tanzania)</option><option value="271">Microsoft Mattias Online (Natural) - Swedish (Sweden)</option><option value="272">Microsoft Sofie Online (Natural) - Swedish (Sweden)</option><option value="273">Microsoft Pallavi Online (Natural) - Tamil (India)</option><option value="274">Microsoft Valluvar Online (Natural) - Tamil (India)</option><option value="275">Microsoft Kani Online (Natural) - Tamil (Malaysia)</option><option value="276">Microsoft Surya Online (Natural) - Tamil (Malaysia)</option><option value="277">Microsoft Anbu Online (Natural) - Tamil (Singapore)</option><option value="278">Microsoft Venba Online (Natural) - Tamil (Singapore)</option><option value="279">Microsoft Kumar Online (Natural) - Tamil (Sri Lanka)</option><option value="280">Microsoft Saranya Online (Natural) - Tamil (Sri Lanka)</option><option value="281">Microsoft Mohan Online (Natural) - Telugu (India)</option><option value="282">Microsoft Shruti Online (Natural) - Telugu (India)</option><option value="283">Microsoft Niwat Online (Natural) - Thai (Thailand)</option><option value="284">Microsoft Premwadee Online (Natural) - Thai (Thailand)</option><option value="285">Microsoft Ahmet Online (Natural) - Turkish (Turkey)</option><option value="286">Microsoft Emel Online (Natural) - Turkish (Turkey)</option><option value="287">Microsoft Ostap Online (Natural) - Ukrainian (Ukraine)</option><option value="288">Microsoft Polina Online (Natural) - Ukrainian (Ukraine)</option><option value="289">Microsoft Gul Online (Natural) - Urdu (India)</option><option value="290">Microsoft Salman Online (Natural) - Urdu (India)</option><option value="291">Microsoft Asad Online (Natural) - Urdu (Pakistan)</option><option value="292">Microsoft Uzma Online (Natural) - Urdu (Pakistan)</option><option value="293">Microsoft Madina Online (Natural) - Uzbek (Uzbekistan)</option><option value="294">Microsoft Sardor Online (Natural) - Uzbek (Uzbekistan)</option><option value="295">Microsoft HoaiMy Online (Natural) - Vietnamese (Vietnam)</option><option value="296">Microsoft NamMinh Online (Natural) - Vietnamese (Vietnam)</option><option value="297">Microsoft Aled Online (Natural) - Welsh (United Kingdom)</option><option value="298">Microsoft Nia Online (Natural) - Welsh (United Kingdom)</option><option value="299">Microsoft Thando Online (Natural) - Zulu (South Africa)</option><option value="300">Microsoft Themba Online (Natural) - Zulu (South Africa)</option></select> Img Avatar: <input type="text" placeholder="Coloque a Url da Imagem Aqui" width="400" id="img2" value="https://randomuser.me/api/portraits/men/67.jpg">
+
+<br>
+
+Imagem do Fundo: <input type="text" placeholder="Coloque a Url da Imagem Aqui" width="400" id="imgfundo" value="https://cdn.pixabay.com/photo/2018/01/14/23/12/nature-3082832_1280.jpg"><br>
+
+
+<textarea id="conversa" cols="75" rows="25"></textarea>
+</div>
+
+
+<div class="chat-container">
+<ul class="chat" id="chat">
+</ul>
+</div>
+
+
+<div style="height:100px;"></div>
+
+
+
+
+<script>
+async function limpa(tudo){
+
+
+tamanho_box = document.getElementById("chat").offsetHeight;
+const listItems = document.querySelectorAll('#chat li');
+
+
+const toKeep = [listItems.length-1];
+
+
+//alert(tamanho_box);
+if(!tudo){
+if(tamanho_box >625){
+
+
+Array.from(listItems).forEach((listItem, index) => {
+if (!toKeep.includes(index)) {
+listItem.parentNode.removeChild(listItem);
+}
+});
+
+
+}
+}else{
+Array.from(listItems).forEach((listItem, index) => {
+
+listItem.parentNode.removeChild(listItem);
+
+});
+
+
+}
+}
+
+
+async function appendLi(voz,texto)
+{
+
+let img1 = document.getElementById("img1").value;
+let img2 = document.getElementById("img2").value;
+
+
+let cimg = voz=="voz1"?img1:img2;
+cimg = cimg.trim();
+
+
+
+
+classe_voz=voz=="voz1"?"message left":"message right";
+var ul = document.getElementById("chat");
+var li = document.createElement("li");
+li.className=classe_voz;
+var text = "<img class='logo' src='"+cimg+"'><p>"+texto+"</p>";
+li.innerHTML=text;
+ul.appendChild(li);
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+</script>
+<style>
+
+
+.linkcanal:link, .linkcanal:visited{
+color:#3c97bf;
+}
+</style>
+
+
+</body></html>
